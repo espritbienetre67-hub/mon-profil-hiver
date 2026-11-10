@@ -1,0 +1,57 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mon profil Hiver — Esprit Bien-être</title><style>body{font:17px/1.55 system-ui,sans-serif;background:#f4f8f5;color:#213e37;margin:0}main{max-width:780px;margin:auto;padding:28px 20px 80px}h1,h2{color:#205e50}section{background:white;padding:20px 25px;margin:20px 0;border-radius:14px;box-shadow:0 2px 10px #183b3020}label{display:block;padding:7px 0;cursor:pointer}input{accent-color:#28785e;margin-right:10px}button{background:#226e59;color:white;padding:13px 22px;border:0;border-radius:10px;font-size:17px;cursor:pointer}#result{border:2px solid #28785e;display:none}small{color:#567267}.pill{background:#e5f4eb;padding:5px 10px;border-radius:20px}a{color:#17644f}</style></head><body><main><h1>Hiver tranquille — Mon profil Hiver</h1><p>Esprit Bien-être · 5 à 8 minutes · Questionnaire d’orientation, sans diagnostic médical.</p><p>Répondez selon votre quotidien. Pour les questions à choix multiples, plusieurs réponses sont possibles.</p><form id="q"></form><button id="go" type="button">Créer ma routine personnalisée</button><section id="result" aria-live="polite"></section><p><small>Les compléments alimentaires, huiles essentielles et autres préparations naturelles sont facultatifs. Le questionnaire ne recommande ni cure d’argile ingérée ni traitement d’une maladie. Consultez un professionnel en cas de situation médicale particulière.</small></p></main><script>
+const qs=[
+['rythme','Quel est votre rythme de vie ?','radio',['Travail en journée','Travail de nuit ou horaires décalés','Retraite ou horaires libres','Journées chargées ou imprévisibles','Sans activité professionnelle']],
+['moment','Quand avez-vous le plus facilement du temps pour vous ?','checkbox',['Au réveil','Pendant une pause ou un repas','Avant ma période de sommeil','Cela dépend des jours']],
+['priorites','Pilier 1 — Qu’aimeriez-vous améliorer cet hiver ?','checkbox',['Sommeil et récupération','Alimentation','Activité physique','Gestion du stress et de la fatigue']],
+['aloe','Pilier 2 — Votre expérience de l’aloe vera','checkbox',['Je ne connais pas','Je connais déjà','J’en utilise','Je souhaite des recettes','Je préfère éviter']],
+['phyco','Pilier 3 — Votre expérience de la phycocyanine','checkbox',['Je ne connais pas','Je connais déjà','J’en utilise','Je souhaite des recettes','Je préfère éviter les compléments']],
+['argile','Pilier 4 — Votre expérience de l’argile verte','checkbox',['Je ne connais pas','Je connais déjà','J’en ai utilisé','Je veux comprendre ses propriétés et précautions','Je préfère éviter']],
+['boisson','Pilier 5 — Les boissons aux champignons','checkbox',['Je voudrais remplacer mon café','Je souhaite varier mes boissons','Je veux en savoir davantage','J’en utilise déjà','Je préfère mes boissons habituelles']],
+['he','Pilier 6 — Quelle est votre expérience des huiles essentielles ?','checkbox',['Je ne connais pas les huiles essentielles','Je les connais déjà','J’en utilise actuellement ou occasionnellement','J’aimerais obtenir davantage d’informations','Je souhaite mieux connaître leurs précautions','Je préfère ne pas en utiliser']],
+['vit','Pilier 7 — Vitamines, minéraux et compléments','checkbox',['Je ne connais pas bien les compléments','J’en utilise déjà','Je veux comprendre leur intérêt','Je préfère les sources alimentaires','Je préfère éviter les compléments']],
+['temps','Combien de temps pouvez-vous consacrer à votre routine ?','radio',['5 minutes','10 à 15 minutes','20 à 30 minutes','Cela dépend des jours']]
+];
+const form=document.getElementById('q');qs.forEach((q,i)=>{const s=document.createElement('section');s.innerHTML=`<small>Question ${i+1} sur 10 · ${q[2]==='radio'?'Choix unique':'Plusieurs réponses possibles'}</small><h2>${q[1]}</h2>`;q[3].forEach((v,j)=>{const l=document.createElement('label');const x=document.createElement('input');x.type=q[2];x.name=q[0];x.value=v;x.id=q[0]+j;l.append(x,document.createTextNode(v));s.append(l)});form.append(s)});
+const vals=n=>[...document.querySelectorAll(`input[name="${n}"]:checked`)].map(x=>x.value);const has=(n,t)=>vals(n).some(v=>v.includes(t));
+const profiles=[
+ {id:'aloe',pillar:2,title:'Découvrir l’aloe vera',avoid:['éviter'],signals:['recettes','utilise','connais pas'],action:'Découvrez les préparations alimentaires d’aloe vera et choisissez, si vous le souhaitez, une recette fruitée du pilier 2. Vérifiez la nature du produit et ses précautions ; aucune consommation n’est obligatoire.',chapter:'Pilier 2 — Aloe vera : préparations, recettes et précautions'},
+ {id:'phyco',pillar:3,title:'Explorer la phycocyanine',avoid:['éviter'],signals:['recettes','utilise','connais pas'],action:'Essayez le smoothie bleu douceur du pilier 3, avec ou sans phycocyanine. Si vous choisissez un produit alimentaire, contrôlez sa qualité et suivez sa notice.',chapter:'Pilier 3 — Phycocyanine : smoothie bleu, choix du produit et précautions'},
+ {id:'argile',pillar:4,title:'Mieux connaître l’argile verte',avoid:['éviter'],signals:['comprendre','utilisé','connais pas'],action:'Consacrez une courte pause à la fiche du pilier 4 : usages traditionnels, qualité, limites des preuves et précautions. Aucune ingestion n’est proposée.',chapter:'Pilier 4 — Argile verte : usages et précautions'},
+ {id:'boisson',pillar:5,title:'Découvrir les boissons aux champignons',avoid:['préfère mes'],signals:['remplacer','varier','savoir','utilise'],action:'Choisissez une recette de boisson chaude du pilier 5 ou comparez les compositions. Si vous êtes sensible à la caféine, vérifiez les ingrédients et l’heure de consommation.',chapter:'Pilier 5 — Boissons aux champignons : recettes, composition et vigilance'},
+ {id:'he',pillar:6,title:'Explorer les huiles essentielles avec prudence',avoid:['préfère ne pas'],signals:['connais déjà','utilise','informations','précautions','ne connais'],action:'Lisez la fiche du pilier 6 sur les précautions, les usages possibles et leurs limites. Il n’est pas nécessaire d’en utiliser ; évitez toute application ou diffusion sans vérifier les contre-indications.',chapter:'Pilier 6 — Huiles essentielles : usages et sécurité'},
+ {id:'vit',pillar:7,title:'Faire le point sur vitamines et minéraux',avoid:['éviter les compléments'],signals:['connais pas','utilise','comprendre','sources alimentaires'],action:'Identifiez dans le pilier 7 des aliments sources de vitamines et minéraux et vérifiez si une supplémentation a un intérêt dans votre situation avant tout achat.',chapter:'Pilier 7 — Vitamines et minéraux : sources alimentaires et besoins'}
+];
+const norm=x=>x.toLocaleLowerCase('fr').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const checked=n=>vals(n).map(norm);
+const any=(a,terms)=>a.some(x=>terms.some(t=>x.includes(norm(t))));
+const safe=x=>x.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+document.getElementById('go').onclick=()=>{
+ if(!vals('rythme').length||!vals('temps').length){alert('Merci de préciser votre rythme de vie et le temps disponible.');return;}
+ const duration=vals('temps')[0],is5=duration==='5 minutes';
+ const moments=checked('moment');
+ const when=any(moments,['au réveil'])?'après votre réveil':any(moments,['pause'])?'pendant une pause':any(moments,['avant'])?'avant votre période de sommeil':'au moment le plus pratique pour vous';
+ const choices=checked('priorites');
+ const foundations=[
+  {title:'Prendre soin de votre récupération',pillar:1,score:any(choices,['sommeil'])?8:2,action:`Réservez ${is5?'5':'10 à 15'} minutes de calme avant votre période de sommeil principale, même si vous travaillez de nuit.`,chapter:'Pilier 1 — Sommeil et récupération'},
+  {title:'Composer un repas plus varié',pillar:1,score:any(choices,['alimentation'])?8:2,action:'Ajoutez un fruit ou un légume à un repas adapté à votre rythme.',chapter:'Pilier 1 — Alimentation variée'},
+  {title:'Bouger à votre rythme',pillar:1,score:any(choices,['activité'])?8:2,action:`Marchez ${is5?'5':'10'} minutes ou pratiquez un mouvement doux adapté à vos capacités.`,chapter:'Pilier 1 — Mouvement'},
+  {title:'Installer une pause apaisante',pillar:1,score:any(choices,['stress'])?8:1,action:`Prenez ${is5?'5':'10'} minutes ${when} pour vous détendre sans écran.`,chapter:'Pilier 1 — Récupération et équilibre'}
+ ];
+ const discovered=[];
+ for(const p of profiles){const a=checked(p.id);if(!a.length)continue;const avoid=any(a,p.avoid);const signal=any(a,p.signals);if(avoid)continue;
+  if(signal){const score=any(a,['recettes','varier','remplacer','utilise','utilisé','précautions','comprendre','informations','sources alimentaires'])?9:6;
+   discovered.push({...p,score});}
+ }
+ // Prioritize the reader's expressed interests, while preserving one accessible foundation.
+ const primary=foundations.sort((a,b)=>b.score-a.score)[0];
+ const remaining=[...discovered,...foundations.filter(x=>x!==primary)].sort((a,b)=>b.score-a.score||a.pillar-b.pillar);
+ const actions=[primary];
+ for(const a of remaining){if(actions.length===3)break;if(actions.some(x=>x.title===a.title))continue;actions.push(a);}
+ const selected=new Set(actions.map(x=>x.pillar));
+ const exploration=profiles.map(p=>({name:p.chapter,avoid:any(checked(p.id),p.avoid),chosen:selected.has(p.pillar)}));
+ const dayText=['Choisissez le geste n°1 et préparez ce dont vous avez besoin.','Testez le geste n°1 au moment le plus simple.','Découvrez le geste n°2, sans abandonner le premier.','Adaptez les deux gestes à votre emploi du temps.','Essayez le geste n°3 si vous en avez envie.','Choisissez une recette ou une fiche de lecture parmi les piliers.','Faites le bilan : gardez ce qui vous convient, sans obligation de tout faire.'];
+ const r=document.getElementById('result');r.style.display='block';
+ r.innerHTML=`<h2>Votre routine Hiver tranquille</h2><p><span class="pill">${safe(duration)}</span> <span class="pill">${safe(vals('rythme')[0])}</span></p><p>Voici vos trois propositions de départ. Elles reflètent vos centres d’intérêt, sans imposer de produits ni promettre une protection contre les infections.</p><ol>${actions.map(a=>`<li><strong>${safe(a.title)}</strong> — ${safe(a.action)} <small>À retrouver : ${safe(a.chapter)}</small></li>`).join('')}</ol><h3>Votre parcours de sept jours</h3><ol>${dayText.map(t=>`<li>${safe(t)}</li>`).join('')}</ol><h3>Les semaines 2 à 4</h3><p><strong>Semaine 2 :</strong> rendez les gestes choisis faciles à répéter. <strong>Semaine 3 :</strong> explorez une recette ou un chapitre supplémentaire. <strong>Semaine 4 :</strong> faites le bilan de vos préférences et de votre budget, sans attribuer automatiquement vos ressentis à un produit.</p><h3>Les sept piliers restent à votre disposition</h3><p>Vous pouvez lire chaque chapitre indépendamment, même s’il ne figure pas dans vos trois priorités :</p><ul><li>Pilier 1 — Habitudes de vie</li>${exploration.map(p=>`<li>${safe(p.name)}${p.avoid?' — vous avez indiqué préférer ne pas utiliser ce type de produit ; le chapitre reste consultable à titre d’information':''}</li>`).join('')}</ul><p><small>Les préparations naturelles restent facultatives. En cas de grossesse, allaitement, maladie chronique ou traitement, vérifiez les précautions avec un professionnel de santé. L’argile ingérée n’est pas recommandée dans ce parcours.</small></p><button type="button" onclick="window.print()">Imprimer ou enregistrer ma routine en PDF</button>`;
+ r.scrollIntoView({behavior:'smooth'});
+};
+</script></body></html>
